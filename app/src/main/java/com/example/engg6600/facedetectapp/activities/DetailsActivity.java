@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UsersListActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity {
 
-    private AppCompatActivity activity = UsersListActivity.this;
+    private AppCompatActivity activity = DetailsActivity.this;
     private AppCompatTextView textViewName;
     private RecyclerView recyclerViewUsers;
     private List<User> listUsers;
@@ -30,7 +30,7 @@ public class UsersListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_users_list);
+        setContentView(R.layout.activity_details);
         getSupportActionBar().setTitle("");
         initViews();
         initObjects();
@@ -60,9 +60,13 @@ public class UsersListActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(activity);
 
         String emailFromIntent = getIntent().getStringExtra("EMAIL");
-        textViewName.setText(emailFromIntent);
 
-        getDataFromSQLite();
+        // query database to get name from email
+        String userName = databaseHelper.getUserName(emailFromIntent);
+        textViewName.setText(userName);
+
+        //getDataFromSQLite();
+        getUserFromSQLite(emailFromIntent);
     }
 
     /**
@@ -75,6 +79,28 @@ public class UsersListActivity extends AppCompatActivity {
             protected Void doInBackground(Void... params) {
                 listUsers.clear();
                 listUsers.addAll(databaseHelper.getAllUser());
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                usersRecyclerAdapter.notifyDataSetChanged();
+            }
+        }.execute();
+    }
+
+    /**
+     * This method is to fetch all user records from SQLite
+     */
+    private void getUserFromSQLite(final String email) {
+        // AsyncTask is used that SQLite operation not blocks the UI Thread.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                listUsers.clear();
+                listUsers.addAll(databaseHelper.getCurrentUser(email));
 
                 return null;
             }

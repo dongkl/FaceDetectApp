@@ -15,18 +15,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/text_title"
-            android:textSize="20sp" />
+            android:textSize="24sp" />
 
         <android.support.v7.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:textSize="20sp"
             android:text="@string/text_hello" />
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/textViewName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="20sp" />
 
     </android.support.v7.widget.LinearLayoutCompat>
 
@@ -36,7 +38,7 @@
         android:paddingBottom="5dp"
         android:paddingLeft="16dp"
         android:paddingTop="5dp"
-        android:text="@string/text_accounts"
+        android:text="@string/text_myaccount"
         android:textColor="@android:color/black" />
 
     <android.support.v7.widget.RecyclerView
