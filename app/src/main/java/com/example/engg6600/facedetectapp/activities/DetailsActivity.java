@@ -1,5 +1,6 @@
 package com.example.engg6600.facedetectapp.activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.example.engg6600.facedetectapp.R;
 import com.example.engg6600.facedetectapp.adapters.UsersRecyclerAdapter;
@@ -111,5 +113,11 @@ public class DetailsActivity extends AppCompatActivity {
                 usersRecyclerAdapter.notifyDataSetChanged();
             }
         }.execute();
+    }
+
+    public void onTake(View view)
+    {
+        Intent takePhotoIntent = new Intent(this, CameraActivity.class);
+        startActivity(takePhotoIntent);
     }
 }

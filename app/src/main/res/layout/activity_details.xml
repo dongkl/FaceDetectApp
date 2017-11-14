@@ -54,17 +54,21 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.1"
         android:layout_gravity="bottom" >
+
         <Button
             android:id="@+id/btnLoadPicture"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:onClick="onLoad"
             android:text="@string/btntxt_Load" />
+
         <Button
             android:id="@+id/btnTakePicture"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:onClick="onTake"
             android:text="@string/btntxt_Take" />
     </android.support.v7.widget.LinearLayoutCompat>
 
