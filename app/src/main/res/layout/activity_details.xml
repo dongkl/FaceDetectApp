@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="100dp"
         android:background="@color/colorPrimary"
         android:gravity="center"
+        android:layout_weight="0.3"
         android:orientation="vertical">
 
         <android.support.v7.widget.AppCompatTextView
@@ -21,8 +23,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:textSize="20sp"
-            android:text="@string/text_hello" />
+            android:text="@string/text_hello"
+            android:textSize="20sp" />
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/textViewName"
@@ -35,15 +37,35 @@
     <android.support.v7.widget.AppCompatTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:paddingBottom="5dp"
-        android:paddingLeft="16dp"
         android:paddingTop="5dp"
         android:text="@string/text_myaccount"
         android:textColor="@android:color/black" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewUsers"
+        android:layout_weight="0.5"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="200dp" />
 
-</LinearLayout>
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:layout_gravity="bottom" >
+        <Button
+            android:id="@+id/btnLoadPicture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/btntxt_Load" />
+        <Button
+            android:id="@+id/btnTakePicture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/btntxt_Take" />
+    </android.support.v7.widget.LinearLayoutCompat>
+
+</android.support.v7.widget.LinearLayoutCompat>
