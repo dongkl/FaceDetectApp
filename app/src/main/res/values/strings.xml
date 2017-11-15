@@ -18,8 +18,9 @@
     <string name="error_password_match">Password Does Not Matches</string>
     <string name="error_valid_email_password">Wrong Email or Password</string>
     <string name="action_settings">Settings</string>
-    <string name="btntxt_Load">Load Picture</string>
-    <string name="btntxt_Take">Take Picture</string>
+    <string name="btntxt_Load">Load Photo</string>
+    <string name="btntxt_Take">Take Photo</string>
+    <string name="btntxt_Test">Start Test</string>
     <string name="text_hello">Hello,</string>
     <string name="text_title">ENGG6600 Mobile App</string>
 </resources>
