@@ -5,7 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -37,6 +40,7 @@ import android.widget.Toast;
 
 import com.example.engg6600.facedetectapp.R;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -205,7 +209,14 @@ public class CameraActivity extends AppCompatActivity {
                         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                         byte[] bytes = new byte[buffer.capacity()];
                         buffer.get(bytes);
-                        save(bytes);
+                        if (cameraId == CAMERA_FRONT) {
+                            byte[] bytes_out = new byte[buffer.capacity()];
+                            bytes_out = transform_bmp(bytes);
+                            save(bytes_out);
+                        }
+                        else {
+                            save(bytes);
+                        }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -221,19 +232,44 @@ public class CameraActivity extends AppCompatActivity {
                     try {
                         output = new FileOutputStream(file);
                         output.write(bytes);
+                        Toast.makeText(CameraActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
                     } finally {
                         if (null != output) {
                             output.close();
                         }
                     }
                 }
+                private byte[] transform_bmp(byte[] data){
+                    Bitmap bitPic = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    int width = bitPic.getWidth();
+                    int height = bitPic.getHeight();
+                    Matrix matrix = new Matrix();
+
+                    float[] mirrorY = { -1, 0, 0, 0, 1, 0, 0, 0, 1};
+                    Matrix matrixMirrorY = new Matrix();
+                    matrixMirrorY.setValues(mirrorY);
+
+                    matrix.postConcat(matrixMirrorY);
+
+                    matrix.postRotate(180);
+
+                    // Create new Bitmap out of the old one
+                    Bitmap bitPicFinal = Bitmap.createBitmap(bitPic, 0, 0, width, height, matrix, true);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitPicFinal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] data_out = stream.toByteArray();
+                    bitPic.recycle();
+                    bitPicFinal.recycle();
+                    return data_out;
+                }
+
+
             };
             reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
             final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(CameraActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
                     createCameraPreview();
                 }
             };
