@@ -30,5 +30,14 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         app:srcCompat="@drawable/cameraswitch" />
+
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btn_takepicture"
+        android:layout_alignParentEnd="true"
+        android:onClick="donePhoto"
+        android:text="Done" />
 </RelativeLayout>
 

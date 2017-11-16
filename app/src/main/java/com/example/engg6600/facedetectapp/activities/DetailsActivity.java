@@ -27,6 +27,7 @@ import com.example.engg6600.facedetectapp.adapters.UsersRecyclerAdapter;
 import com.example.engg6600.facedetectapp.model.User;
 import com.example.engg6600.facedetectapp.sql.DatabaseHelper;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class DetailsActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
 
     private final int RESULT_LOAD_IMG = 1234;
+    private final int RESULT_TAKE_IMG = 4321;
     private final int MAX_FACES = 5;
     private ImageView image_view;
     public Bitmap mFaceBitmap;
@@ -138,8 +140,8 @@ public class DetailsActivity extends AppCompatActivity {
 
     public void onTake(View view)
     {
-        Intent takePhotoIntent = new Intent(this, CameraActivity.class);
-        startActivity(takePhotoIntent);
+        Intent photoTakeIntent = new Intent(this, CameraActivity.class);
+        startActivityForResult(photoTakeIntent, RESULT_TAKE_IMG);
     }
 
     public void onLoad(View view)
@@ -152,21 +154,40 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
+        if (reqCode == RESULT_LOAD_IMG){
+            if (resultCode == RESULT_OK) {
+                try {
+                    final Uri imageUri = data.getData();
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                    image_view.setImageBitmap(selectedImage);
+                    mFaceBitmap = selectedImage;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Toast.makeText(DetailsActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                }
 
-        if (resultCode == RESULT_OK) {
-            try {
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                image_view.setImageBitmap(selectedImage);
-                mFaceBitmap = selectedImage;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(DetailsActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(DetailsActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
-
-        }else {
-            Toast.makeText(DetailsActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+        }
+        if (reqCode == RESULT_TAKE_IMG){
+            if (resultCode == RESULT_OK) {
+                try {
+                    final String fn = data.getStringExtra("PICNAME");
+                    final File file = new File(fn);
+                    if(file.exists()){
+                        Bitmap selectedImage = BitmapFactory.decodeFile(file.getAbsolutePath());
+                        image_view.setImageBitmap(selectedImage);
+                        mFaceBitmap = selectedImage;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(DetailsActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                }
+            }else {
+                Toast.makeText(DetailsActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+            }
         }
     }
 

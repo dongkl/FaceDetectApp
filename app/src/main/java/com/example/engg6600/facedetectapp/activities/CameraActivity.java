@@ -1,7 +1,9 @@
 package com.example.engg6600.facedetectapp.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
@@ -71,9 +73,9 @@ public class CameraActivity extends AppCompatActivity {
     protected CaptureRequest.Builder captureRequestBuilder;
     private Size imageDimension;
     private ImageReader imageReader;
-    private File file;
+    private File file = null;
+    private String filename = null;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
-    private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     //private shakeDetector shakedetector;
@@ -192,7 +194,8 @@ public class CameraActivity extends AppCompatActivity {
             String imageFileName = "/PIC" + timeStamp + ".jpg";
             File myDir = new File(Environment.getExternalStorageDirectory(), "ENGG6600");
             myDir.mkdir();
-            final File file = new File(myDir.getAbsolutePath()+imageFileName);
+            filename = myDir.getAbsolutePath()+imageFileName;
+            file = new File(filename);
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
@@ -370,5 +373,17 @@ public class CameraActivity extends AppCompatActivity {
         closeCamera();
         stopBackgroundThread();
         super.onPause();
+    }
+
+    public void donePhoto(View view){
+        if (filename == null){
+            Toast.makeText(CameraActivity.this, "Please take a photo first!", Toast.LENGTH_LONG).show();
+        }
+        else{
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("PICNAME",filename);
+            setResult(Activity.RESULT_OK,returnIntent);
+            finish();
+        }
     }
 }
