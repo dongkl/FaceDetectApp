@@ -1,5 +1,6 @@
 package com.example.engg6600.facedetectapp.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,6 +21,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.engg6600.facedetectapp.R;
@@ -27,11 +30,19 @@ import com.example.engg6600.facedetectapp.adapters.UsersRecyclerAdapter;
 import com.example.engg6600.facedetectapp.model.User;
 import com.example.engg6600.facedetectapp.sql.DatabaseHelper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+
+import com.microsoft.projectoxford.face.FaceServiceClient;
+import com.microsoft.projectoxford.face.FaceServiceRestClient;
+import com.microsoft.projectoxford.face.contract.Face;
+import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
 
 public class DetailsActivity extends AppCompatActivity {
@@ -45,17 +56,114 @@ public class DetailsActivity extends AppCompatActivity {
 
     private final int RESULT_LOAD_IMG = 1234;
     private final int RESULT_TAKE_IMG = 4321;
-    private final int MAX_FACES = 5;
+    private final int MAX_FACES = 15;
     private ImageView image_view;
     public Bitmap mFaceBitmap;
+    ProgressBar mProgressBar ;
+
+
+    ProgressDialog mProgressDialog;
+
+
+    // Background task of face detection.
+    private class DetectionTask extends AsyncTask<InputStream, String, Face[]> {
+        private boolean mSucceed = true;
+
+        @Override
+        protected Face[] doInBackground(InputStream... params) {
+            // Get an instance of face service client to detect faces in image.
+            FaceServiceClient faceServiceClient = new FaceServiceRestClient(getString(R.string.endpoint), getString(R.string.subscription_key));
+            try {
+                publishProgress("Detecting...");
+
+                // Start detection.
+                return faceServiceClient.detect(
+                        params[0],  /* Input stream of image to detect */
+                        true,       /* Whether to return face ID */
+                        true,       /* Whether to return face landmarks */
+                        /* Which face attributes to analyze, currently we support:
+                           age,gender,headPose,smile,facialHair */
+                        new FaceServiceClient.FaceAttributeType[] {
+                                FaceServiceClient.FaceAttributeType.Age,
+                                FaceServiceClient.FaceAttributeType.Gender,
+                                FaceServiceClient.FaceAttributeType.Smile,
+                                FaceServiceClient.FaceAttributeType.Glasses,
+                                FaceServiceClient.FaceAttributeType.FacialHair,
+                                FaceServiceClient.FaceAttributeType.Emotion,
+                                FaceServiceClient.FaceAttributeType.HeadPose,
+                                FaceServiceClient.FaceAttributeType.Accessories,
+                                FaceServiceClient.FaceAttributeType.Blur,
+                                FaceServiceClient.FaceAttributeType.Exposure,
+                                FaceServiceClient.FaceAttributeType.Hair,
+                                FaceServiceClient.FaceAttributeType.Makeup,
+                                FaceServiceClient.FaceAttributeType.Noise,
+                                FaceServiceClient.FaceAttributeType.Occlusion
+                        });
+            } catch (Exception e) {
+                mSucceed = false;
+                publishProgress(e.getMessage());
+                //addLog(e.getMessage());
+                return null;
+            }
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //mProgressDialog.show();
+            //addLog("Request: Detecting in image " + mImageUri);
+
+           mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onProgressUpdate(String... progress) {
+            //mProgressDialog.setMessage(progress[0]);
+            //setInfo(progress[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Face[] result) {
+            if (mSucceed) {
+               // addLog("Response: Success. Detected " + (result == null ? 0 : result.length)
+                //        + " face(s) in " + mImageUri);
+                //mProgressDialog.dismiss();
+                mProgressBar.setVisibility(View.INVISIBLE);
+
+
+                // Show the result on screen when detection is done.
+                image_view.setImageBitmap(parseBitmap(result,result.length));
+            }
+
+
+
+        }
+    }
+
+
+    private void setUiAfterDetection(Face[] result, boolean succeed) {
+
+    }
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        getSupportActionBar().setTitle("");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
         initViews();
         initObjects();
+
+       // mProgressDialog = new ProgressDialog(this);
+       // mProgressDialog.setTitle(getString(R.string.progress_dialog_title));
+
+         mProgressBar = (ProgressBar)findViewById(R.id.progressbar);
+         mProgressBar.setVisibility(View.INVISIBLE);
+        //ProgressBar progressBar = new ProgressBar(DetailsActivity.this,null,android.R.attr.progressBarStyleLarge);
+        //RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
+        //params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        //layout.addView(progressBar,params);
 
     }
 
@@ -86,7 +194,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         // query database to get name from email
         String userName = databaseHelper.getUserName(emailFromIntent);
-        textViewName.setText(userName);
+        textViewName.setText("Welcome "+userName +" !");
 
         //getDataFromSQLite();
         getUserFromSQLite(emailFromIntent);
@@ -192,7 +300,17 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     public  void onTest(View view) {
-        Toast.makeText(DetailsActivity.this, "Recognizing", Toast.LENGTH_LONG).show();
+
+
+        // Put the image into an input stream for detection.
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        mFaceBitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(output.toByteArray());
+
+        // Start a background task to detect faces in the image.
+        new DetectionTask().execute(inputStream);
+
+/*        Toast.makeText(DetailsActivity.this, "Recognizing", Toast.LENGTH_LONG).show();
 
         FaceDetector.Face[] faces = new FaceDetector.Face[MAX_FACES];
         // Setup format as RGB_565
@@ -214,28 +332,53 @@ public class DetailsActivity extends AppCompatActivity {
         }
         else{
             Toast.makeText(DetailsActivity.this, "No face recognized", Toast.LENGTH_LONG).show();
-        }
+        }*/
     }
     /**
      * Draw a box on recognized face
      */
-    private Bitmap parseBitmap(FaceDetector.Face[] faces, int faceCount){
-        Bitmap bitmap = Bitmap.createBitmap(mFaceBitmap.getWidth(), mFaceBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    private Bitmap parseBitmap(Face[] faces, int faceCount){
+        //Bitmap bitmap = Bitmap.createBitmap(mFaceBitmap.getWidth(), mFaceBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = mFaceBitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
-        Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(Color.YELLOW);
-        mPaint.setStrokeWidth(10);
-        mPaint.setStyle(Paint.Style.STROKE);
 
-        canvas.drawBitmap(mFaceBitmap, 0, 0, mPaint);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.YELLOW);
+        int stokeWidth = 10;
+        paint.setStrokeWidth(stokeWidth);
+
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(Color.RED);
+        //textPaint.setStyle(Paint.Style.STROKE);
+        textPaint.setStrokeWidth(20);
+        textPaint.setStyle(Paint.Style.FILL);
+
+
+        //canvas.drawBitmap(mFaceBitmap, 0, 0, Paint);
         for (int i = 0; i < faceCount; i++){
             // get middle of eyes
             PointF midPoint = new PointF();
-            faces[i].getMidPoint(midPoint);
+            String age_gender =  faces[i].faceAttributes.gender +"," + faces[i].faceAttributes.age;
+
+            FaceRectangle faceRectangle  = faces[i].faceRectangle;
+
+            textPaint.setTextSize(20*getResources().getDisplayMetrics().density);
             // get distance between eyes
-            float eyeDistance = faces[i].eyesDistance();
+            //float eyeDistance = faces[i].eyesDistance();
             // draw a box
-            canvas.drawRect(midPoint.x - eyeDistance, midPoint.y - eyeDistance, midPoint.x + eyeDistance, midPoint.y + eyeDistance, mPaint);
+            //canvas.drawRect(midPoint.x - eyeDistance, midPoint.y - eyeDistance, midPoint.x + eyeDistance, midPoint.y + eyeDistance, mPaint);
+            canvas.drawRect(faceRectangle.left,
+                    faceRectangle.top,
+                    faceRectangle.left + faceRectangle.width,
+                    faceRectangle.top + faceRectangle.height,
+                    paint);
+            canvas.drawText(age_gender,
+                    faceRectangle.left ,
+                    faceRectangle.top-20,
+                   textPaint);
+
         }
 
         return bitmap;
