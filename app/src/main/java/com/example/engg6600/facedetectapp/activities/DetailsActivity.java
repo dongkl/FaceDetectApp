@@ -45,8 +45,6 @@ import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.Face;
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
-import org.w3c.dom.Text;
-
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -267,6 +265,7 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
+        text_view.setText("");
         if (reqCode == RESULT_LOAD_IMG){
             if (resultCode == RESULT_OK) {
                 try {
@@ -280,7 +279,7 @@ public class DetailsActivity extends AppCompatActivity {
                     Toast.makeText(DetailsActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
                 }
 
-            }else {
+            } else {
                 Toast.makeText(DetailsActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
         }
@@ -298,7 +297,7 @@ public class DetailsActivity extends AppCompatActivity {
                     e.printStackTrace();
                     Toast.makeText(DetailsActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
                 }
-            }else {
+            } else {
                 Toast.makeText(DetailsActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
         }
