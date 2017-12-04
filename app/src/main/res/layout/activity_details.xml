@@ -24,10 +24,31 @@
         android:layout_width="match_parent"
         android:layout_height="70dp" />
 
-    <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/imgViewerPicture"
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/imgAndInfo"
         android:layout_width="match_parent"
-        android:layout_height="220dp" />
+        android:layout_height="220dp"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/imgViewerPicture"
+            android:layout_width="250dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewInfo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@android:color/black" />
+
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+
+
+
+
     <ProgressBar
         android:id="@+id/progressbar"
         style="?android:attr/progressBarStyleHorizontal"

@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.engg6600.facedetectapp.R;
@@ -44,6 +45,8 @@ import com.microsoft.projectoxford.face.FaceServiceRestClient;
 import com.microsoft.projectoxford.face.contract.Face;
 import com.microsoft.projectoxford.face.contract.FaceRectangle;
 
+import org.w3c.dom.Text;
+
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -58,6 +61,7 @@ public class DetailsActivity extends AppCompatActivity {
     private final int RESULT_TAKE_IMG = 4321;
     private final int MAX_FACES = 15;
     private ImageView image_view;
+    private TextView text_view;
     public Bitmap mFaceBitmap;
     ProgressBar mProgressBar ;
 
@@ -174,6 +178,7 @@ public class DetailsActivity extends AppCompatActivity {
         textViewName = (AppCompatTextView) findViewById(R.id.textViewName);
         recyclerViewUsers = (RecyclerView) findViewById(R.id.recyclerViewUsers);
         image_view = (ImageView) findViewById(R.id.imgViewerPicture);
+        text_view = (TextView) findViewById(R.id.textViewInfo);
     }
 
     /**
@@ -194,7 +199,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         // query database to get name from email
         String userName = databaseHelper.getUserName(emailFromIntent);
-        textViewName.setText("Welcome "+userName +" !");
+        textViewName.setText("Welcome, " + userName + "!");
 
         //getDataFromSQLite();
         getUserFromSQLite(emailFromIntent);
@@ -299,7 +304,7 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    public  void onTest(View view) {
+    public void onTest(View view) {
 
 
         // Put the image into an input stream for detection.
@@ -355,30 +360,29 @@ public class DetailsActivity extends AppCompatActivity {
         textPaint.setStrokeWidth(20);
         textPaint.setStyle(Paint.Style.FILL);
 
-
+        text_view.setText("");
         //canvas.drawBitmap(mFaceBitmap, 0, 0, Paint);
         for (int i = 0; i < faceCount; i++){
-            // get middle of eyes
-            PointF midPoint = new PointF();
-            String age_gender =  faces[i].faceAttributes.gender +"," + faces[i].faceAttributes.age;
-
-            FaceRectangle faceRectangle  = faces[i].faceRectangle;
-
-            textPaint.setTextSize(20*getResources().getDisplayMetrics().density);
+            String gender = faces[i].faceAttributes.gender;
+            Double age = faces[i].faceAttributes.age;
+            FaceRectangle faceRectangle = faces[i].faceRectangle;
+            textPaint.setTextSize(20 * getResources().getDisplayMetrics().density);
+            /*
             // get distance between eyes
-            //float eyeDistance = faces[i].eyesDistance();
+            float eyeDistance = faces[i].eyesDistance();
             // draw a box
-            //canvas.drawRect(midPoint.x - eyeDistance, midPoint.y - eyeDistance, midPoint.x + eyeDistance, midPoint.y + eyeDistance, mPaint);
+            canvas.drawRect(midPoint.x - eyeDistance, midPoint.y - eyeDistance, midPoint.x + eyeDistance, midPoint.y + eyeDistance, mPaint);
+            */
             canvas.drawRect(faceRectangle.left,
                     faceRectangle.top,
                     faceRectangle.left + faceRectangle.width,
                     faceRectangle.top + faceRectangle.height,
                     paint);
-            canvas.drawText(age_gender,
-                    faceRectangle.left ,
+            canvas.drawText("Face " + (i + 1),
+                    faceRectangle.left,
                     faceRectangle.top-20,
-                   textPaint);
-
+                    textPaint);
+            text_view.append((i + 1) + ": " + gender + ", " + age + " years" + "\n");
         }
 
         return bitmap;
